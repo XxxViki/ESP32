@@ -57,7 +57,6 @@ void app_main(void)
 
     while (1) {
         ESP_LOGI(TAG, "This is a freertos example\n");
-        
 
         vTaskDelay(CONFIG_BLINK_PERIOD / portTICK_PERIOD_MS);
     }
