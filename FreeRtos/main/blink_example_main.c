@@ -95,11 +95,39 @@ void vTask4(void *pvParameters)
 }
 
 //++++++++++++++++++++++++++++++++EventGroup+++++++++++++++++++++++++++++ */
+EventGroupHandle_t xEventGroup = NULL;  //创建事件组句柄
+EventBits_t uxBits;  //事件组的bit位
+
+#define BIT_0 (1 << 0)
+#define BIT_1 (1 << 1)
 
 
 //++++++++++++++++++++++++++++++++EventGroup+++++++++++++++++++++++++++++ */
 
+void vTask5(void *pvParameters)
+{
+    while (1) {
+        xEventGroupSetBits(xEventGroup, BIT_0);  //设置事件组的bit0
+        vTaskDelay(3000 / portTICK_PERIOD_MS);
+        xEventGroupSetBits(xEventGroup, BIT_1);  //设置事件组的bit0
+        vTaskDelay(2000 / portTICK_PERIOD_MS);
+    }
+}
 
+void vTask6(void *pvParameters)
+{
+    while (1) {
+        uxBits = xEventGroupWaitBits(xEventGroup, BIT_0|BIT_1, pdTRUE, pdFALSE, portMAX_DELAY);  //等待事件组的bit0
+        if ((uxBits & (BIT_0|BIT_1)) == (BIT_0|BIT_1)) {
+            ESP_LOGI(TAG, "Task6 get the bit0 and bit1\n");
+        } else if ((uxBits & BIT_0) == BIT_0) {
+            ESP_LOGI(TAG, "Task6 get the bit1\n");
+        } else if ((uxBits & BIT_1) == BIT_1) {
+
+            ESP_LOGI(TAG, "Task6 get the bit0\n");
+        }
+    }
+}
 //++++++++++++++++++++++++++++++++EventGroup+++++++++++++++++++++++++++++ */
 void app_main(void)
 {
@@ -125,8 +153,14 @@ void app_main(void)
     xSemaphore = xSemaphoreCreateBinary();  //创建一个二值信号量
     xCountingSemaphore = xSemaphoreCreateCounting(10, 7);  //创建一个计数信号量，最大计数为10，初始计数为0
 
-    xTaskCreatePinnedToCore(vTask3, "Task3", 2048, NULL, 10, NULL, 0);  //信号量
-    xTaskCreatePinnedToCore(vTask4, "Task4", 2048, NULL, 10, NULL, 0);  //信号量
+    // xTaskCreatePinnedToCore(vTask3, "Task3", 2048, NULL, 10, NULL, 0);  //信号量
+    // xTaskCreatePinnedToCore(vTask4, "Task4", 2048, NULL, 10, NULL, 0);  //信号量
+
+    //事件组
+    xEventGroup = xEventGroupCreate();  //创建一个事件组
+    xTaskCreatePinnedToCore(vTask5, "Task5", 2048, NULL, 10, NULL, 0);  //事件组
+    xTaskCreatePinnedToCore(vTask6, "Task6", 2048, NULL, 10, NULL, 0);  //事件组
+
 
     //TODO 需要了解为什么添加vTaskStartScheduler();会异常重启
     // vTaskStartScheduler();
