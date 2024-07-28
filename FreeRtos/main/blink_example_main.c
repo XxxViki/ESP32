@@ -128,7 +128,56 @@ void vTask6(void *pvParameters)
         }
     }
 }
-//++++++++++++++++++++++++++++++++EventGroup+++++++++++++++++++++++++++++ */
+//++++++++++++++++++++++++++++++++END+++++++++++++++++++++++++++++ */
+
+
+//++++++++++++++++++++++++++++++++Notify+++++++++++++++++++++++++++++ */
+TaskHandle_t vTask7_Handle = NULL;
+TaskHandle_t vTask8_Handle = NULL;
+TaskHandle_t vTask9_Handle = NULL;
+
+
+//++++++++++++++++++++++++++++++++Notify+++++++++++++++++++++++++++++ */
+void vTask7(void *pvParameters)
+{
+    uint32_t value = 0;
+    while (1) {
+        vTaskDelay(3000 / portTICK_PERIOD_MS);
+        xTaskNotify(vTask8_Handle, value++, eSetValueWithOverwrite);  //eSetValueWithOverwrite 无条件将value发送通知给Task8
+        xTaskNotify(vTask9_Handle, value++, eSetValueWithOverwrite);  //eSetValueWithOverwrite 无条件将value发送通知给Task9
+        ESP_LOGI(TAG, "Task7 send notify to Task8\n");
+    }
+}
+
+void vTask8(void *pvParameters)
+{
+    uint32_t value = 0;
+    while (1) {
+        xTaskNotifyWait(0,ULLONG_MAX,&value,portMAX_DELAY);  //ULLONG_MAX所有位
+       
+        ESP_LOGI(TAG, "Task8 receive notify value %lu from Task7\n", value);
+    
+    }
+}
+
+void vTask9(void *pvParameters)
+{
+    uint32_t value = 0;
+    while (1) {
+        xTaskNotifyWait(0,ULLONG_MAX,&value,portMAX_DELAY);  //ULLONG_MAX所有位
+       
+        ESP_LOGI(TAG, "Task9 receive notify value %lu from Task7\n", value);
+    
+    }
+}
+
+//++++++++++++++++++++++++++++++++END+++++++++++++++++++++++++++++ */
+
+
+
+
+
+
 void app_main(void)
 {
 
@@ -158,8 +207,16 @@ void app_main(void)
 
     //事件组
     xEventGroup = xEventGroupCreate();  //创建一个事件组
-    xTaskCreatePinnedToCore(vTask5, "Task5", 2048, NULL, 10, NULL, 0);  //事件组
-    xTaskCreatePinnedToCore(vTask6, "Task6", 2048, NULL, 10, NULL, 0);  //事件组
+    // xTaskCreatePinnedToCore(vTask5, "Task5", 2048, NULL, 10, NULL, 0);  //事件组
+    // xTaskCreatePinnedToCore(vTask6, "Task6", 2048, NULL, 10, NULL, 0);  //事件组
+
+    //通知,不需要创建句柄
+    xTaskCreatePinnedToCore(vTask7, "Task7", 2048,NULL , 10, &vTask7_Handle, 0);  //通知
+    xTaskCreatePinnedToCore(vTask8, "Task8", 2048,NULL , 10, &vTask8_Handle, 0);  //通知
+    xTaskCreatePinnedToCore(vTask9, "Task9", 2048,NULL , 10, &vTask9_Handle, 0);  //通知
+
+    
+
 
 
     //TODO 需要了解为什么添加vTaskStartScheduler();会异常重启
