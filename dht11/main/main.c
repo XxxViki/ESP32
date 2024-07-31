@@ -84,8 +84,8 @@ static int parse_items(rmt_symbol_word_t *item, int item_num, int *humidity, int
 	for (i = 0; i < 16; i++, item++)	// 提取湿度数据
 	{
 		uint16_t duration = 0;
-		if(item->level0)
-			duration = item->duration0;
+		if(item->level0)              //脉冲第一个电平是否为高电平
+			duration = item->duration0;   // 脉冲宽度
 		else
 			duration = item->duration1;
 		rh = (rh << 1) + (duration < 35 ? 0 : 1);
@@ -112,7 +112,7 @@ static int parse_items(rmt_symbol_word_t *item, int item_num, int *humidity, int
 		checksum = (checksum << 1) + (duration < 35 ? 0 : 1);
 	}
 	// 检查校验
-	if ((((temp >> 8) + temp + (rh >> 8) + rh) & 0xFF) != checksum){
+	if ((((temp >> 8) + temp + (rh >> 8) + rh) & 0xFF) != checksum){  // 校验失败
 		ESP_LOGI(TAG, "Checksum failure %4X %4X %2X\n", temp, rh, checksum);
 		return 0;
 	}
