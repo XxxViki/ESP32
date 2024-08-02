@@ -10,8 +10,17 @@
 #include "driver/rmt_tx.h"
 #include "led_ws2812.h"
 
-#define WS2812_GPIO_NUM     GPIO_NUM_27
+static const char *TAG = "main";
+
+#define WS2812_GPIO_NUM     GPIO_NUM_1
 #define WS2812_LED_NUM      1
+
+/**
+ * @brief Simple helper function, converting HSV color space to RGB color space
+ *
+ * Wiki: https://en.wikipedia.org/wiki/HSL_and_HSV
+ *
+ */
 
 /** HSV转RGB ，暂无用到
  * @param h:色调(0-360) s饱和度(0-100) v亮度(0-100)
@@ -74,16 +83,18 @@ void app_main(void)
     {
 
 
-        uint32_t r = 40,g = 65,b = 5;
+        uint32_t r = 80,g = 6,b = 5;
         ws2812_write(ws2812_handle,index,r,g,b);
         vTaskDelay(pdMS_TO_TICKS(1000));
-        uint32_t r2 = 5,g2 = 40,b2 = 5;
+        uint32_t r2 = 5,g2 = 90,b2 = 5;
         ws2812_write(ws2812_handle,index,r2,g2,b2);
         vTaskDelay(pdMS_TO_TICKS(1.5000));
 
-        uint32_t r3 = 85,g3 = 5,b3 =40;
+        uint32_t r3 = 5,g3 = 5,b3 =75;
         ws2812_write(ws2812_handle,index,r3,g3,b3);
         vTaskDelay(pdMS_TO_TICKS(1000));
+
+        ESP_LOGI(TAG, "[APP] APP Is Start!~\r\n");
 
     }
 
