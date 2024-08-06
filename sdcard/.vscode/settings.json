@@ -1,0 +1,8 @@
+{
+    "idf.adapterTargetName": "esp32s3",
+    "files.associations": {
+        "sdmmc_host.h": "c",
+        "sdmmc_default_configs.h": "c"
+    },
+    "idf.portWin": "COM4"
+}
